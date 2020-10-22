@@ -11,7 +11,7 @@ public class MoveCtrl : MonoBehaviour
         LOOK_AT,
         GEAR_VR
     }
-    public MoveType moveType = MoveType.WAY_POINT;
+    public MoveType moveType = MoveType.LOOK_AT;
     public float speed = 1.0f;
     public float damping = 3.0f;
 
@@ -20,7 +20,10 @@ public class MoveCtrl : MonoBehaviour
     private CharacterController cc;
     private Transform camTr;
     private int nextIdx = 1;
-    // Start is called before the first frame update
+    private int netIdx;
+
+
+    public static bool isStopped = false;
     void Start()
     {
         tr = GetComponent<Transform>();
@@ -35,6 +38,7 @@ public class MoveCtrl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isStopped) return;
         switch (moveType)
         {
             case MoveType.WAY_POINT:
@@ -51,7 +55,7 @@ public class MoveCtrl : MonoBehaviour
     void MoveWayPoint()
     {
         Vector3 direction = points[nextIdx].position - tr.position;
-        Quaternion rot = Quaternion.Slerp(tr.rotation, rot, Time.deltaTime * damping);
+        Quaternion rot = Quaternion.LookRotation(direction);
         tr.rotation = Quaternion.Slerp(tr.rotation, rot, Time.deltaTime * damping);
         tr.Translate(Vector3.forward * Time.deltaTime * speed);
 
@@ -65,7 +69,7 @@ public class MoveCtrl : MonoBehaviour
     }
     private void OnTriggerEnter(Collider coll)
     {
-        if (coll.CompareTag("WAY_POINT)) { 
+        if (coll.CompareTag("WAY_POINT")) { 
                 nextIdx = (++netIdx >= points.Length) ? 1 : netIdx;
         }
     }
